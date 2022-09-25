@@ -20,3 +20,7 @@ pio device monitor
 
 Press enter and type help. You should see the configuration commands for setup your WiFi and time settings.
 
+# Credits
+
+The original version was from LilyGO but this version burned the libraries and dependencies into the main repository. Also the LVGL config was into the hidden directory. For show the best practices I did this basic example using some tools from PlatformIO.
+
