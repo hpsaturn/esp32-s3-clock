@@ -1,2 +1,22 @@
 # esp32-s3-clock
-Basic digital clock synced with Internet via NTP and configured via Serial console CLI
+
+Basic digital clock synced with Internet via NTP and configured via command line (CLI via USB-Serial)
+
+## Build and Upload
+
+Please install first [PlatformIO](http://platformio.org/) open source ecosystem for IoT development compatible with **Arduino** IDE and its command line tools (Windows, MacOs and Linux). Also, you may need to install [git](http://git-scm.com/) in your system.
+
+```bash
+pio run --target upload
+```
+
+## Configuration
+
+Using your USB cable, connect it and run:
+
+```bash
+pio device monitor
+```
+
+Press enter and type help. You should see the configuration commands for setup your WiFi and time settings.
+
