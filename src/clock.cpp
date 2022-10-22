@@ -179,9 +179,11 @@ void setup() {
   wcli.term->add("bootanim", &showBootAnimation, "\tshow boot animation");
   LV_DELAY(100);
   ui_begin();
+  Serial.println("end setup");
 }
 
 void loop() {
+  while(!wcli.isConfigured()) wcli.loop();
   lv_timer_handler();
   button1.tick();
   button2.tick();
