@@ -1,4 +1,6 @@
 #include "Arduino.h"
+#include "Wire.h"
+#include "SPI.h"
 #include "OneButton.h"
 #include "WiFi.h"
 #include "esp_lcd_panel_io.h"
@@ -11,6 +13,7 @@
 #include "sntp.h"
 #include "time.h"
 #include <ESP32WifiCLI.hpp>
+#include <Sensors.hpp>
 
 esp_lcd_panel_io_handle_t io_handle = NULL;
 static lv_disp_draw_buf_t disp_buf; // contains internal graphic buffer(s) called draw buffer(s)
@@ -179,6 +182,15 @@ void setup() {
   wcli.term->add("bootanim", &showBootAnimation, "\tshow boot animation");
   LV_DELAY(100);
   ui_begin();
+
+  Wire.begin(43,44);
+
+  sensors.setSampleTime(5);                        // config sensors sample time interval
+  // sensors.setOnDataCallBack(&onSensorDataOk);      // all data read callback
+  // sensors.setOnErrorCallBack(&onSensorDataError);  // [optional] error callback
+  sensors.setDebugMode(true);                      // [optional] debug mode
+  sensors.detectI2COnly(true); 
+  sensors.init();
   Serial.println("end setup");
 }
 
@@ -200,6 +212,7 @@ void loop() {
     last_tick = millis();
   }
   wcli.loop();
+  sensors.loop();
 }
 
 void printLocalTime() {
