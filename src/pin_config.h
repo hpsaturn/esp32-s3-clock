@@ -1,4 +1,3 @@
-#pragma once
 
 #define WIFI_CONNECT_WAIT_MAX        (30 * 1000)
 

@@ -23,6 +23,7 @@ static bool is_initialized_lvgl = false;
 OneButton button1(PIN_BUTTON_1, true);
 OneButton button2(PIN_BUTTON_2, true);
 extern const unsigned char img_logo[20000];
+
 void wifi_test(void);
 void timeavailable(struct timeval *t);
 void printLocalTime();
@@ -46,6 +47,35 @@ static void example_lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_
   esp_lcd_panel_draw_bitmap(panel_handle, offsetx1, offsety1, offsetx2 + 1, offsety2 + 1, color_map);
 }
 
+LV_IMG_DECLARE(lilygo2_gif);
+
+void showBootAnimation(String opts) {
+  lv_obj_t *logo_img = lv_gif_create(lv_scr_act());
+  lv_obj_center(logo_img);
+  lv_gif_set_src(logo_img, &lilygo2_gif);
+  LV_DELAY(1200);
+  lv_obj_del(logo_img);
+}
+
+void printLocalTime() {
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("No time available (yet)");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
+// Callback function (get's called when time adjusts via NTP)
+void timeavailable(struct timeval *t) {
+  Serial.println("Got time adjustment from NTP!");
+  printLocalTime();
+  WiFi.disconnect();
+}
+
+void reboot(String opts) {
+  ESP.restart();
+}
+
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
     // Serial.println("onWifiStatus");
@@ -57,23 +87,10 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   }
 };
 
-LV_IMG_DECLARE(lilygo2_gif);
-
-void showBootAnimation(String opts) {
-  lv_obj_t *logo_img = lv_gif_create(lv_scr_act());
-  lv_obj_center(logo_img);
-  lv_gif_set_src(logo_img, &lilygo2_gif);
-  LV_DELAY(1200);
-  lv_obj_del(logo_img);
-}
-
-void reboot(String opts) {
-  ESP.restart();
-}
-
 void setup() {
   pinMode(PIN_POWER_ON, OUTPUT);
   digitalWrite(PIN_POWER_ON, HIGH);
+  
   Serial.begin(115200);
 
   sntp_servermode_dhcp(1); // (optional)
@@ -215,17 +232,3 @@ void loop() {
   sensors.loop();
 }
 
-void printLocalTime() {
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
-    Serial.println("No time available (yet)");
-    return;
-  }
-  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-}
-// Callback function (get's called when time adjusts via NTP)
-void timeavailable(struct timeval *t) {
-  Serial.println("Got time adjustment from NTP!");
-  printLocalTime();
-  WiFi.disconnect();
-}
