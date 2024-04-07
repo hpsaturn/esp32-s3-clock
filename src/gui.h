@@ -22,7 +22,7 @@ static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_
   return false;
 }
 
-static void example_lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map) {
+static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map) {
   esp_lcd_panel_handle_t panel_handle = (esp_lcd_panel_handle_t)drv->user_data;
   int offsetx1 = area->x1;
   int offsetx2 = area->x2;
@@ -82,6 +82,7 @@ void displayInit() {
               .dc_data_level = 1,
           },
   };
+
   ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle));
   esp_lcd_panel_handle_t panel_handle = NULL;
   esp_lcd_panel_dev_config_t panel_config = {
@@ -120,12 +121,10 @@ void displayInit() {
   /*Change the following line to your display resolution*/
   disp_drv.hor_res = EXAMPLE_LCD_H_RES;
   disp_drv.ver_res = EXAMPLE_LCD_V_RES;
-  disp_drv.flush_cb = example_lvgl_flush_cb;
+  disp_drv.flush_cb = lvgl_flush_cb;
   disp_drv.draw_buf = &disp_buf;
   disp_drv.user_data = panel_handle;
   lv_disp_drv_register(&disp_drv);
 
   is_initialized_lvgl = true;
-
-
 }
