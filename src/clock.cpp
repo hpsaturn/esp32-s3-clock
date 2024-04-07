@@ -17,6 +17,8 @@ const char * key_tzone = "ktzone";
 const char * default_server = "pool.ntp.org";  
 const char * default_tzone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
+bool wcli_setup_ready = false;
+
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
   }
@@ -26,8 +28,7 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
     Serial.println("ntpzone <TZONE>\t\tset time zone. https://tinyurl.com/4s44uyzn");
     Serial.println("time\t\t\tprint the current time");
   }
-  void onNewWifi(String ssid, String passw) {
-  }
+  void onNewWifi(String ssid, String passw) { wcli_setup_ready = wcli.isConfigured(); }
 };
 
 void updateTimeSettings() {
@@ -91,6 +92,7 @@ void setup() {
   wcli.term->add("bootanim", &showBootAnimation, "show boot animation");
   LV_DELAY(100);
   ui_begin();
+  wcli_setup_ready = wcli.isConfigured();
   Serial.println("end setup\r\n");
 }
 
@@ -109,6 +111,6 @@ void loop() {
     lv_msg_send(MSG_NEW_VOLT, &volt);
     last_tick = millis();
   }
-  while(!wcli.isConfigured()) wcli.loop(); // only for fist setup
+  while(!wcli_setup_ready) wcli.loop(); // only for fist setup
   wcli.loop();
 }
