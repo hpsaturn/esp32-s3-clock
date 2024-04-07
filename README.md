@@ -22,5 +22,4 @@ Press enter and type help. You should see the configuration commands for setup y
 
 ## Credits
 
-The original version was from [LilyGO](https://github.com/Xinyuan-LilyGO/T-Display-S3) but this version burned the libraries and dependencies into the main repository. Also the LVGL config was into the hidden directory. For show the best practices I did this basic example using some tools from PlatformIO.
-
+The original version was from [LilyGO](https://github.com/Xinyuan-LilyGO/T-Display-S3), but this version burned the libraries and dependencies into the main repository. Also the LVGL config was into the hidden directory. For show the best practices I did this basic example using some tools from PlatformIO to suppress this bad practices.  
