@@ -12,6 +12,8 @@ pio run --target upload
 
 ## Configuration
 
+![Clock settings](pics/preview.jpg)
+
 Using your USB cable, connect it and run:
 
 ```bash
@@ -19,6 +21,12 @@ pio device monitor
 ```
 
 Press enter and type help. You should see the configuration commands for setup your WiFi and time settings.
+
+For instance to set Tokio time zone, select the correct time zone code [here](https://raw.githubusercontent.com/nayarsystems/posix_tz_db/master/zones.csv) and set it:
+
+```bash
+ntpzone JST-9
+```
 
 ## Credits
 
