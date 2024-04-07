@@ -9,10 +9,11 @@
 OneButton button1(PIN_BUTTON_1, true);
 OneButton button2(PIN_BUTTON_2, true);
 
-void wifi_test(void);
 void timeavailable(struct timeval *t);
 void printLocalTime();
-void SmartConfig();
+
+const char * key_ntp_server = "kntpserver";
+const char * key_tzone = "ktzone";
 
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   void onWifiStatus(bool isConnected) {
@@ -20,7 +21,8 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
   }
   // Callback for extend the help menu.
   void onHelpShow() {
-    // Serial.println("onHelpShow");
+    Serial.println("ntpserver <server>\tset NTP server. Default: pool.ntp.org");
+    Serial.println("ntpzone <TZONE>\t\tset time zone. https://tinyurl.com/4s44uyzn");
   }
   void onNewWifi(String ssid, String passw) {
   }
@@ -28,6 +30,37 @@ class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
 
 void reboot(String opts) {
   ESP.restart();
+}
+
+void updateTimeSettings() {
+  String server = wcli.getString(key_ntp_server, "pool.ntp.org");
+  String tzone = wcli.getString(key_tzone, "CET-1CEST,M3.5.0,M10.5.0/3");
+  Serial.printf("ntp server: \t%s\r\ntimezone: \t%s\r\n",server.c_str(),tzone.c_str());
+  configTime(0, 0, server.c_str()); // set timezone to UTC+2
+  setenv("TZ", tzone.c_str(), 1);  
+  tzset();
+}
+
+void setNTPServer(String opts) {
+  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+  String server = operands.first();
+  if (server.isEmpty()) {
+    Serial.println(wcli.getString(key_ntp_server, "pool.ntp.org"));
+    return;
+  }
+  wcli.setString(key_ntp_server, server);
+  updateTimeSettings();
+}
+
+void setTimeZone(String opts) {
+  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+  String tzone = operands.first();
+  if (tzone.isEmpty()) {
+    Serial.println(wcli.getString(key_tzone, "CET-1CEST,M3.5.0,M10.5.0/3"));
+    return;
+  }
+  wcli.setString(key_tzone, tzone);
+  updateTimeSettings();
 }
 
 void setup() {
@@ -50,16 +83,20 @@ void setup() {
   });
 
   button2.attachClick([]() { ui_switch_page(); });
-  configTime(7200, 0, "pool.ntp.org"); // set timezone to UTC+2
+  
   showBootAnimation("");
-  // wifi_test();
   wcli.setCallback(new mESP32WifiCLICallbacks());
   wcli.begin();
+  // NTP init
+  updateTimeSettings();
+  // CLI config  
+  wcli.term->add("ntpserver", &setNTPServer, "set NTP server. Default: pool.ntp.org");
+  wcli.term->add("ntpzone", &setTimeZone, "\tset TZONE. https://tinyurl.com/4s44uyzn");
   wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
   wcli.term->add("bootanim", &showBootAnimation, "show boot animation");
   LV_DELAY(100);
   ui_begin();
-  Serial.println("end setup");
+  Serial.println("end setup\r\n");
 }
 
 void loop() {
