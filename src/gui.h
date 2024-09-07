@@ -34,7 +34,7 @@ static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
 
 LV_IMG_DECLARE(lilygo2_gif);
 
-void showBootAnimation(String opts) {
+void showBootAnimation(char *args, Stream *response) {
   lv_obj_t *logo_img = lv_gif_create(lv_scr_act());
   lv_obj_center(logo_img);
   lv_gif_set_src(logo_img, &lilygo2_gif);

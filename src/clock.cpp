@@ -20,14 +20,8 @@ const char * default_tzone = "CET-1CEST,M3.5.0,M10.5.0/3";
 bool wcli_setup_ready = false;
 
 class mESP32WifiCLICallbacks : public ESP32WifiCLICallbacks {
-  void onWifiStatus(bool isConnected) {
-  }
-  // Callback for extend the CLI help menu.
-  void onHelpShow() {
-    Serial.println("ntpserver <server>\tset NTP server. Default: pool.ntp.org");
-    Serial.println("ntpzone <TZONE>\t\tset time zone. https://tinyurl.com/4s44uyzn");
-    Serial.println("time\t\t\tprint the current time");
-  }
+  void onWifiStatus(bool isConnected) {}
+  void onHelpShow() {}
   void onNewWifi(String ssid, String passw) { wcli_setup_ready = wcli.isConfigured(); }
 };
 
@@ -40,8 +34,8 @@ void updateTimeSettings() {
   tzset();
 }
 
-void setNTPServer(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void setNTPServer(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   String server = operands.first();
   if (server.isEmpty()) {
     Serial.println(wcli.getString(key_ntp_server, default_server));
@@ -51,8 +45,8 @@ void setNTPServer(String opts) {
   updateTimeSettings();
 }
 
-void setTimeZone(String opts) {
-  maschinendeck::Pair<String, String> operands = maschinendeck::SerialTerminal::ParseCommand(opts);
+void setTimeZone(char *args, Stream *response) {
+  Pair<String, String> operands = wcli.parseCommand(args);
   String tzone = operands.first();
   if (tzone.isEmpty()) {
     Serial.println(wcli.getString(key_tzone, default_tzone));
@@ -62,7 +56,7 @@ void setTimeZone(String opts) {
   updateTimeSettings();
 }
 
-void printLocalTime(String opts) {
+void printLocalTime(char *args, Stream *response) {
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) {
     Serial.println("No time available (yet)");
@@ -77,23 +71,23 @@ void setup() {
   
   button1.attachClick([]() { shutdown(); });
   button2.attachClick([]() { ui_switch_page(); });
-  
-  showBootAnimation("");
+
+  showBootAnimation(NULL, &Serial);
 
   wcli.setCallback(new mESP32WifiCLICallbacks());
-  wcli.begin();
+  wcli.setSilentMode(true);
   // NTP init
   updateTimeSettings();
   // CLI config  
-  wcli.term->add("ntpserver", &setNTPServer, "set NTP server. Default: pool.ntp.org");
-  wcli.term->add("ntpzone", &setTimeZone, "\tset TZONE. https://tinyurl.com/4s44uyzn");
-  wcli.term->add("time", &printLocalTime, "\tprint the current time");
-  wcli.term->add("reboot", &reboot, "\tperform a ESP32 reboot");
-  wcli.term->add("bootanim", &showBootAnimation, "show boot animation");
+  wcli.add("ntpserver", &setNTPServer, "\tset NTP server. Default: pool.ntp.org");
+  wcli.add("ntpzone", &setTimeZone, "\tset TZONE. https://tinyurl.com/4s44uyzn");
+  wcli.add("time", &printLocalTime, "\t\tprint the current time");
+  wcli.add("reboot", &reboot, "\tperform a ESP32 reboot");
+  wcli.add("bootanim", &showBootAnimation, "\tshow boot animation");
   LV_DELAY(100);
   ui_begin();
   wcli_setup_ready = wcli.isConfigured();
-  Serial.println("end setup\r\n");
+  wcli.begin("esp32s3_clock");
 }
 
 void loop() {
