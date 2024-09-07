@@ -12,7 +12,7 @@ void shutdown() {
   esp_deep_sleep_start();
 }
 
-void reboot(String opts) {
+void reboot(char *args, Stream *response) {
   ESP.restart();
 }
 
