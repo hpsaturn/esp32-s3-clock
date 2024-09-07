@@ -28,6 +28,10 @@ For instance to set Tokio time zone, select the correct time zone code [here](ht
 ntpzone JST-9
 ```
 
+## CLI preview
+
+![ESP32S3 Clock CLI preview](pics/cli.jpg)
+
 ## Credits
 
 The original version was from [LilyGO](https://github.com/Xinyuan-LilyGO/T-Display-S3), but this version burned the libraries and dependencies into the main repository. Also the LVGL config was into the hidden directory. For show the best practices I did this basic example using some tools from PlatformIO to suppress this bad practices.  
